@@ -32,7 +32,10 @@ export default function AdminCategoriesPage() {
   };
 
   const handleAdd = async () => {
-    if (!newName.trim()) return;
+    if (!newName.trim()) {
+      toast.error('Silakan masukkan nama kategori terlebih dahulu');
+      return;
+    }
     setIsAdding(true);
     try { await api.post('/categories', { category_name: newName }); toast.success('Kategori berhasil ditambahkan'); setNewName(''); fetchCategories(); }
     catch { toast.error('Gagal menambahkan kategori'); }
@@ -65,7 +68,7 @@ export default function AdminCategoriesPage() {
         <div className="flex gap-3">
           <input type="text" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Nama kategori baru..." onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
             className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all" />
-          <button onClick={handleAdd} disabled={isAdding || !newName.trim()}
+          <button onClick={handleAdd} disabled={isAdding}
             className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50">
             <Plus className="w-4 h-4" /> Tambah
           </button>
