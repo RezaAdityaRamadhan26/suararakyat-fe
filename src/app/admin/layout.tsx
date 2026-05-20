@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import Sidebar, { MenuItem } from '@/components/Sidebar';
 import Topbar from '@/components/Topbar';
-import { ClipboardList, Tag } from 'lucide-react';
+import { ClipboardList, Tag, User } from 'lucide-react';
 
 const adminMenuItems: MenuItem[] = [
   {
@@ -18,6 +18,11 @@ const adminMenuItems: MenuItem[] = [
     label: 'Kelola Kategori',
     icon: <Tag className="w-5 h-5" />,
   },
+  {
+    href: '/admin/profile',
+    label: 'Profil Saya',
+    icon: <User className="w-5 h-5" />,
+  },
 ];
 
 export default function AdminLayout({
@@ -26,7 +31,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { isAuthenticated, user, loadFromCookie } = useAuthStore();
+  const { isAuthenticated, isInitialized, user, loadFromCookie } = useAuthStore();
   const router = useRouter();
 
   useEffect(() => {
@@ -34,16 +39,18 @@ export default function AdminLayout({
   }, [loadFromCookie]);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.replace('/login');
-      return;
+    if (isInitialized) {
+      if (!isAuthenticated) {
+        router.replace('/login');
+        return;
+      }
+      if (user && user.role !== 'admin' && user.role !== 'super_admin') {
+        router.replace('/dashboard');
+      }
     }
-    if (user && user.role !== 'admin' && user.role !== 'super_admin') {
-      router.replace('/dashboard');
-    }
-  }, [isAuthenticated, user, router]);
+  }, [isInitialized, isAuthenticated, user, router]);
 
-  if (!isAuthenticated || (user && user.role !== 'admin' && user.role !== 'super_admin')) {
+  if (!isInitialized || !isAuthenticated || (user && user.role !== 'admin' && user.role !== 'super_admin')) {
     return null;
   }
 

@@ -13,6 +13,7 @@ interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
+  isInitialized: boolean;
   setAuth: (user: User, token: string) => void;
   logout: () => void;
   loadFromCookie: () => void;
@@ -22,17 +23,18 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   token: null,
   isAuthenticated: false,
+  isInitialized: false,
 
   setAuth: (user: User, token: string) => {
     Cookies.set('token', token, { expires: 1 });
     Cookies.set('user', JSON.stringify(user), { expires: 1 });
-    set({ user, token, isAuthenticated: true });
+    set({ user, token, isAuthenticated: true, isInitialized: true });
   },
 
   logout: () => {
     Cookies.remove('token');
     Cookies.remove('user');
-    set({ user: null, token: null, isAuthenticated: false });
+    set({ user: null, token: null, isAuthenticated: false, isInitialized: true });
   },
 
   loadFromCookie: () => {
@@ -42,12 +44,13 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (token && userStr) {
       try {
         const user = JSON.parse(userStr) as User;
-        set({ user, token, isAuthenticated: true });
+        set({ user, token, isAuthenticated: true, isInitialized: true });
+        return;
       } catch {
         Cookies.remove('token');
         Cookies.remove('user');
-        set({ user: null, token: null, isAuthenticated: false });
       }
     }
+    set({ user: null, token: null, isAuthenticated: false, isInitialized: true });
   },
 }));

@@ -31,7 +31,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { isAuthenticated, loadFromCookie } = useAuthStore();
+  const { isAuthenticated, isInitialized, loadFromCookie } = useAuthStore();
   const router = useRouter();
 
   useEffect(() => {
@@ -39,12 +39,12 @@ export default function DashboardLayout({
   }, [loadFromCookie]);
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (isInitialized && !isAuthenticated) {
       router.replace('/login');
     }
-  }, [isAuthenticated, router]);
+  }, [isInitialized, isAuthenticated, router]);
 
-  if (!isAuthenticated) return null;
+  if (!isInitialized || !isAuthenticated) return null;
 
   return (
     <div className="min-h-screen bg-slate-50">
