@@ -12,6 +12,7 @@ import toast from 'react-hot-toast';
 interface User {
   id: number;
   username: string;
+  email: string;
   role: 'user' | 'admin' | 'super_admin';
 }
 
@@ -27,6 +28,7 @@ export default function SuperAdminUsersPage() {
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
   const [editUserId, setEditUserId] = useState<number | null>(null);
   const [formUsername, setFormUsername] = useState('');
+  const [formEmail, setFormEmail] = useState('');
   const [formPassword, setFormPassword] = useState('');
   const [formRole, setFormRole] = useState<string>('user');
   const [isSaving, setIsSaving] = useState(false);
@@ -40,23 +42,24 @@ export default function SuperAdminUsersPage() {
   };
 
   const openAddModal = () => {
-    setModalMode('add'); setFormUsername(''); setFormPassword(''); setFormRole('user'); setEditUserId(null); setModalOpen(true);
+    setModalMode('add'); setFormUsername(''); setFormEmail(''); setFormPassword(''); setFormRole('user'); setEditUserId(null); setModalOpen(true);
   };
 
   const openEditModal = (u: User) => {
-    setModalMode('edit'); setFormUsername(u.username); setFormPassword(''); setFormRole(u.role); setEditUserId(u.id); setModalOpen(true);
+    setModalMode('edit'); setFormUsername(u.username); setFormEmail(u.email || ''); setFormPassword(''); setFormRole(u.role); setEditUserId(u.id); setModalOpen(true);
   };
 
   const handleSave = async () => {
     if (!formUsername.trim()) { toast.error('Username wajib diisi'); return; }
+    if (!formEmail.trim()) { toast.error('Email wajib diisi'); return; }
     if (modalMode === 'add' && !formPassword.trim()) { toast.error('Password wajib diisi'); return; }
     setIsSaving(true);
     try {
       if (modalMode === 'add') {
-        await api.post('/users', { username: formUsername, password: formPassword, role: formRole });
+        await api.post('/users', { username: formUsername, email: formEmail, password: formPassword, role: formRole });
         toast.success('User berhasil ditambahkan');
       } else {
-        const payload: { username: string; role: string; password?: string } = { username: formUsername, role: formRole };
+        const payload: { username: string; email: string; role: string; password?: string } = { username: formUsername, email: formEmail, role: formRole };
         if (formPassword.trim()) payload.password = formPassword;
         await api.put(`/users/${editUserId}`, payload);
         toast.success('User berhasil diperbarui');
@@ -150,6 +153,11 @@ export default function SuperAdminUsersPage() {
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">Username</label>
                   <input type="text" value={formUsername} onChange={(e) => setFormUsername(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
+                  <input type="email" value={formEmail} onChange={(e) => setFormEmail(e.target.value)}
                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all" />
                 </div>
                 <div>
